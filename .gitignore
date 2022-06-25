@@ -1,0 +1,15 @@
+# img
+*.png
+
+# jupyter
+debug.ipynb
+.ipynb_checkpoints
+
+# VSCode
+.vscode
+
+# private data
+accounts.ini
+
+# html -> debug file
+*.html
