@@ -1,4 +1,3 @@
-import imp
 import time
 import requests
 from bs4 import BeautifulSoup
@@ -35,15 +34,11 @@ class Auto:
         def login(self):
             while True:
                 self.session.cookies.clear()
-              # download and recognize captch
                 with self.session.get(self.captchaUrl, stream= True,allow_redirects=False) as captchaHtml:
                     captcha=captchaHtml.cookies['CheckCode']
 
-                # get login data
                 loginHtml = self.session.get(self.loginUrl)
-                # use BeautifulSoup to parse html
                 parser = BeautifulSoup(loginHtml.text, 'lxml')
-                # update login payload
                 self.loginPayLoad['__VIEWSTATE'] = parser.select("#__VIEWSTATE")[0]['value']
                 self.loginPayLoad['__VIEWSTATEGENERATOR'] = parser.select("#__VIEWSTATEGENERATOR")[0]['value']
                 self.loginPayLoad['__EVENTVALIDATION'] = parser.select("#__EVENTVALIDATION")[0]['value']
@@ -82,18 +77,25 @@ class Auto:
                     "__LASTFOCUS":'',
                     "__VIEWSTATE": parser.select("#__VIEWSTATE")[0]['value'],
                     "__VIEWSTATEGENERATOR":parser.select("#__VIEWSTATEGENERATOR")[0]['value'], 
+                    "__EVENTVALIDATION": parser.select("#__EVENTVALIDATION")[0]['value'],
                     "Q": 'RadioButton1',
-                    "DDL_YM": '',  
-                    "DDL_Dept": tempdept,
+                    "DDL_YM": parser.select_one("option").get("value"),  
+                    "DDL_Dept":tempdept,
                     "DDL_Degree": "0",
                     "Button1": "確定"
                 }
-
-
-                html = self.session.post(self.indexURL, data=selPayLoad,headers=self.session.headers)
-                print(html.text,file=file)
-                
-
+                try:
+                    html = self.session.post(self.indexURL, data=selPayLoad)
+                    
+                except:
+                    self.remove(i)
+        
+        def remove(self,item):
+            if(item in courseList):
+                courseList.remove(item)
+        
+        def setDelay(self, delay):
+            self.delay = delay
 
 if __name__=="__main__":
     configFilename = 'accounts.ini'
@@ -109,4 +111,5 @@ if __name__=="__main__":
     Password = config['Default']['Password']
     bot=Auto(Account, Password)
     bot.login()
+    bot.setDelay(3)
     bot.exec()
