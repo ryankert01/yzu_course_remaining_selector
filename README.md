@@ -1,1 +1,1 @@
-# yzu_course_remaining_selector-
+# yzu_course_remaining_selector
