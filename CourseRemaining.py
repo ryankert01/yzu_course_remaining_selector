@@ -55,7 +55,7 @@ class Auto:
     def Consolelog(self, msg):
         temp = "{} {} ".format(time.strftime("[%Y-%m-%d %H:%M:%S]", time.localtime()), msg)
         print(temp)
-        self.LineNotifyLog(temp)
+    #    self.LineNotifyLog(temp)
         
     def LineNotifyLog(self,msg):
         headers = {
