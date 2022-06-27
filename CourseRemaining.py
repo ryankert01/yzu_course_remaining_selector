@@ -4,10 +4,11 @@ from bs4 import BeautifulSoup as bs
 import configparser
 import os
 
-courseList=['901,LS236A']
+
             
 class Auto:
     def __init__(self, info):
+        self.courseList=[]
         self.account = info[0]
         self.password = info[1]
         self.token = info[2]
@@ -67,15 +68,15 @@ class Auto:
         requests.post("https://notify-api.line.me/api/notify",headers=headers, params=params)
 
     def remove(self,item):
-        if(item in courseList):
-            courseList.remove(item)
+        if(item in self.courseList):
+            self.courseList.remove(item)
         
     def setDelay(self, delay):
         self.delay = delay
 
     def exec(self):
-        while(len(courseList)>0):
-            for course in courseList:
+        while(len(self.courseList)>0):
+            for course in self.courseList:
                 courseDept = course[0:3] # 304
                 courseId = course[4:] # CS380B
                 
@@ -125,11 +126,11 @@ class Auto:
                 postPost = self.session.post(self.indexURL,data=PostPayLoad)
                 result =  bs(postPost.text,"lxml")     # result of the request
 
+                info = self.getCourseInfo(result)
                 #get forall class info in this Department
-                coursedb = self.getCourseDB(result)     # coursedb => [[courseId]...]
-                self.Consolelog("Get {} course db Success".format(courseDept))
-                courseinfo = self.getCourseInfo(result) # courseinfo => [['id', 'Tname', 'CName', 'Remain', 'Total']...]
-                self.Consolelog("Get {} course info Success".format(courseDept))
+                coursedb = info[0]    # coursedb => [[courseId]...]
+                courseinfo = info[1] # courseinfo => [['id', 'Tname', 'CName', 'Remain', 'Total']...]
+                self.Consolelog("Get {} infos Success".format(courseDept))
                 
                 if(courseId not in coursedb):
                     self.Consolelog("Can't get course in {}".format(courseDept))
@@ -142,10 +143,11 @@ class Auto:
                         # courseinfo => [['id', 'Tname', 'CName', 'Remain', 'Total']...]
                         self.LineNotifyLog("{} {} is avail for {} people".format(courseinfo[index][0],courseinfo[index][2],remain))
                         self.Consolelog("{} {} is avail for {} people".format(courseinfo[index][0],courseinfo[index][2],remain))
-
-    def getCourseDB(self,soup):
+        
+    def getCourseInfo(self,soup):
         result = soup.select("#Table1")[0].select("tr")
         num = 0
+        couinfo=[]
         coudb=[]
         for i in result:
             num+=1
@@ -153,25 +155,24 @@ class Auto:
                 continue
             else:
                 tempCode = i.select("td")[1].text.split(' ')
-                couID = "{}{}".format(tempCode[0],tempCode[1])
+                couID = "{}{}".format(tempCode[0],tempCode[1])  
                 coudb.append(couID)
-        return coudb
-        
-    def getCourseInfo(self,soup):
-        result = soup.select("#Table1")[0].select("tr")
-        num = 0
-        couinfo=[]
-        for i in result:
-            num+=1
-            if(num%2==1):
-                continue
-            else:
-                tempCode = i.select("td")[1].text.split(' ')
-                couID = "{}{}".format(tempCode[0],tempCode[1])
-                # temp =[couID,i.select("td")[6].text,i.select("td")[7].text.split('/')[0][2:],i.select("td")[7].text.split('/')[0][2:]]
                 temp =[couID,i.select("td")[6].text,i.select("td")[3].select_one('a').text,i.select("td")[7].text.split('/')[0][2:],i.select("td")[7].text.split('/')[1]] 
                 couinfo.append(temp)
-        return couinfo
+        return [coudb,couinfo]
+
+    def setCourseList(self):
+        with open("CourseList.txt","r") as f:
+            courses = f.readlines()
+        f.close()
+
+        for course in courses:
+            if(course[-1] == "\n"):
+                course = course[:-1]
+            self.courseList.append(course)
+        
+        print(self.courseList)
+        self.Consolelog("Set CourseList Success")
 
 if __name__=="__main__":
     configFilename = 'accounts.ini'
@@ -179,12 +180,20 @@ if __name__=="__main__":
         with open(configFilename, 'a') as f:
             f.writelines(["[Default]\n", "Account= your account\n", "Password= your password\n","Token= your LineNotifyToken"])
             print('input your info in accounts.ini')
+            f.close()
             exit()
-
+    
+    classFilename = 'CourseList.txt'
+    if not os.path.isfile(configFilename):
+        with open(configFilename, 'a') as f:
+            print('input your info in accounts.ini')
+            f.close()
+            exit()   
     config = configparser.ConfigParser()
     config.read(configFilename)
     info=[config['Default']['Account'],config['Default']['Password'],config['Default']['Token']]
     bot=Auto(info)
     bot.login()
+    bot.setCourseList()
     bot.setDelay(3)
     bot.exec()
