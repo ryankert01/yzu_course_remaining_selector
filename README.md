@@ -28,13 +28,16 @@ Password=
 Token=
 ```
 
-4.修改CourseRemaining.py 中的 `courseList`
+4.在  中
+5.修改 CourseList.txt 中輸入課號
+一行一個課號，格式如下
 ```
-courseList=['901,LS236A'] [系所代碼,課號班別]
+'901,LS236A' 
 ```
+901 是系所代碼, LS236A 是課號班別
 
-5. 執行
-```cmd
+6. 執行
+```
 python CourseRemaining.py
 ```
 > **Warning** <br>
