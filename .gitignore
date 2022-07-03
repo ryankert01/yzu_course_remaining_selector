@@ -13,3 +13,6 @@ accounts.ini
 
 # html -> debug file
 *.html
+
+#class data
+CourseList.txt

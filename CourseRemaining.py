@@ -101,7 +101,7 @@ class Auto:
                     '__VIEWSTATEGENERATOR': parser.select("#__VIEWSTATEGENERATOR")[0]['value'],
                     '__EVENTVALIDATION': parser.select("#__EVENTVALIDATION")[0]['value'],
                     'Q': 'RadioButton1',
-                    'DDL_YM': '111,1  '  ,
+                    'DDL_YM': parser.select('option')[0]['value']  ,
                     'DDL_Dept': courseDept,
                     'DDL_Degree': '0'
                 }
@@ -117,7 +117,7 @@ class Auto:
                     '__VIEWSTATEGENERATOR': parser.select("#__VIEWSTATEGENERATOR")[0]['value'],
                     '__EVENTVALIDATION': parser.select("#__EVENTVALIDATION")[0]['value'],
                     'Q': 'RadioButton1',
-                    'DDL_YM': '111,1  ',
+                    'DDL_YM': parser.select('option')[0]['value'],
                     'DDL_Dept': courseDept,
                     'DDL_Degree': '0',
                     'Button1': '確定'
@@ -170,7 +170,7 @@ class Auto:
             if(course[-1] == "\n"):
                 course = course[:-1]
             self.courseList.append(course)
-        
+        self.courseList.sort()
         print(self.courseList)
         self.Consolelog("Set CourseList Success")
 
@@ -186,7 +186,7 @@ if __name__=="__main__":
     classFilename = 'CourseList.txt'
     if not os.path.isfile(configFilename):
         with open(configFilename, 'a') as f:
-            print('input your info in accounts.ini')
+            print('input your info in CourseList.txt')
             f.close()
             exit()   
     config = configparser.ConfigParser()
